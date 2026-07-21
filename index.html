@@ -1655,7 +1655,7 @@ function copiarEmailCobranca(transp, cartas) {
     .sort((a,b) => parseInt(b.numero||0) - parseInt(a.numero||0))
     .map(h => {
       const dias = diasEmAberto(h.data_geracao);
-      return `Carta ${h.numero} | ${h.cliente} | NFO ${h.nfo} | R$ ${formatMoeda(parseFloat(h.total||0))} | Emitida: ${(h.data_geracao||'').split(' ')[0]} | ${dias} dias em aberto`;
+      return `Carta ${h.numero} | ${h.cliente} | NFO ${h.nfo} | R$ ${formatMoeda(parseFloat(h.total||0))} | Emitida: ${(h.data_geracao||"").split(" ")[0]} | ${dias} dias em aberto`;
     }).join('\n');
 
   // Texto do e-mail
@@ -1702,7 +1702,7 @@ Rua Triunfo, 945 — Ribeirão Preto/SP
       </div>
       <textarea id="txt-email-cob" style="width:100%;height:320px;padding:12px;border:1.5px solid #e8eaec;border-radius:8px;font-family:monospace;font-size:12px;resize:none;outline:none">${corpo.replace(/</g,'&lt;')}</textarea>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button onclick="document.getElementById('txt-email-cob').select();document.execCommand('copy');this.textContent='✅ Copiado!';setTimeout(()=>this.textContent='📋 Selecionar e Copiar',2000)"
+        <button onclick="copiarTextoCob(this)"
           style="flex:1;padding:11px;background:#0b6136;color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">
           📋 Selecionar e Copiar
         </button>
@@ -1966,6 +1966,16 @@ function fecharModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
 });
+function copiarTextoCob(btn) {
+  const ta = document.getElementById('txt-email-cob');
+  if(ta) {
+    ta.select();
+    document.execCommand('copy');
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => { btn.textContent = '📋 Selecionar e Copiar'; }, 2000);
+  }
+}
+
 let toastTimer;
 function toast(msg,tipo='success'){
   const el=document.getElementById('toast');
