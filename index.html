@@ -552,6 +552,18 @@ let responsaveis = [
   { nome:'Jefferson Santos', cargo:'Depto. Logística', empresa:'Apis Flora Indl. e Coml. Ltda.', assinatura_b64: null },
 ];
 let transportadoras = [];
+
+function carregarTransportadoras() {
+  // Prioriza dados em memória (carregados do Supabase), depois localStorage
+  if(transportadoras.length) return transportadoras;
+  const s = localStorage.getItem('apis_transportadoras');
+  return s ? JSON.parse(s) : [
+    'ATIVA DISTRIBUIÇÃO E LOGÍSTICA LTDA','EXPRESSO SÃO MIGUEL S/A',
+    'JADLOG LOGÍSTICA S.A.','CORREIOS','BRASPRESS TRANSPORTES URGENTES LTDA',
+    'TNT MERCÚRIO LTDA','RAPIDÃO COMETA','JAMEF TRANSPORTES EIRELI',
+    'TEGMA GESTÃO LOGÍSTICA S.A.','RODONAVES TRANSPORTES E ENCOMENDAS LTDA'
+  ];
+}
 let historico = [];
 let ordemHistorico = { campo: 'numero', direcao: 'desc' };
 let uploadingNome = null;
