@@ -23882,7 +23882,6 @@ function renderizarCobrancas() {
 function copiarEmailCobranca(transp, cartas) {
   const sau = saudacao();
   const totalTransp = cartas.reduce((s,h) => s+parseFloat(h.total||0), 0);
-  const hoje = new Date().toLocaleDateString('pt-BR');
 
   const linhasEmail = cartas
     .sort((a,b) => parseInt(b.numero||0) - parseInt(a.numero||0))
@@ -23899,87 +23898,99 @@ function copiarEmailCobranca(transp, cartas) {
       </tr>`;
     }).join('');
 
-  const emailHtml = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f5f6">
-<div style="max-width:700px;margin:0 auto;background:white">
+  const emailHtml = `
+    <div style="font-family:Arial,sans-serif;max-width:700px">
+      <div style="background:linear-gradient(135deg,#0a3922 0%,#0b6136 100%);padding:24px 32px;display:flex;align-items:center;gap:16px">
+        <img src="${LOGO_B64_COB}" style="height:50px" alt="Apis Flora">
+        <div>
+          <div style="color:white;font-size:18px;font-weight:700">Apis Flora Indl. e Coml. Ltda.</div>
+          <div style="color:rgba(255,255,255,0.75);font-size:12px;margin-top:2px">Departamento de Logística</div>
+        </div>
+      </div>
+      <div style="padding:32px;background:white">
+        <p style="margin:0 0 16px;font-size:14px;color:#2c3540">${sau},</p>
+        <p style="margin:0 0 24px;font-size:14px;color:#2c3540;line-height:1.6">
+          Entramos em contato para solicitar o posicionamento referente às <strong>Cartas de Débito</strong>
+          pendentes de pagamento listadas abaixo. Solicitamos gentilmente que nos informe a previsão de pagamento
+          ou efetue o depósito na conta indicada ao final deste e-mail.
+        </p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px">
+          <thead>
+            <tr style="background:#0b6136">
+              <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase">Nº Carta</th>
+              <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase">Cliente / Remetente</th>
+              <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase">NFO</th>
+              <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase">Valor</th>
+              <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase">Emissão</th>
+              <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase">Em aberto</th>
+            </tr>
+          </thead>
+          <tbody>${linhasEmail}</tbody>
+          <tfoot>
+            <tr style="background:#e6f2ec">
+              <td colspan="3" style="padding:12px 14px;font-weight:700;color:#0a3922;font-size:14px">TOTAL PENDENTE</td>
+              <td colspan="3" style="padding:12px 14px;font-family:monospace;font-weight:700;font-size:16px;color:#0a3922">R$ ${formatMoeda(totalTransp)}</td>
+            </tr>
+          </tfoot>
+        </table>
+        <p style="margin:24px 0 8px;font-size:13px;color:#5a6472">
+          Em caso de dúvidas ou para envio do comprovante, entre em contato com o Departamento de Logística da Apis Flora.
+        </p>
+        <div style="background:#f4f5f6;border-radius:10px;padding:18px 20px;margin-top:20px">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#5a6472;margin-bottom:10px">Dados para pagamento</div>
+          <table style="font-size:13px;color:#2c3540;border-collapse:collapse">
+            <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#5a6472">Banco</td><td><strong>Banco do Brasil</strong></td></tr>
+            <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#5a6472">Agência</td><td><strong>3235-2</strong></td></tr>
+            <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#5a6472">Conta</td><td><strong>160.197-0</strong></td></tr>
+            <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#5a6472">CNPJ</td><td><strong>49.345.358/0001-45</strong></td></tr>
+          </table>
+        </div>
+      </div>
+      <div style="background:#0a3922;padding:16px 32px;text-align:center">
+        <div style="color:rgba(255,255,255,0.7);font-size:11px">
+          Apis Flora Indl. e Coml. Ltda. · Rua Triunfo, 945 · Ribeirão Preto/SP · (16) 3514-4444
+        </div>
+      </div>
+    </div>`;
 
-  <!-- CABEÇALHO -->
-  <div style="background:linear-gradient(135deg,#0a3922 0%,#0b6136 100%);padding:24px 32px;display:flex;align-items:center;gap:16px">
-    <img src="${LOGO_B64_COB}" style="height:50px" alt="Apis Flora">
-    <div>
-      <div style="color:white;font-size:18px;font-weight:700">Apis Flora Indl. e Coml. Ltda.</div>
-      <div style="color:rgba(255,255,255,0.75);font-size:12px;margin-top:2px">Departamento de Logística</div>
-    </div>
-  </div>
-
-  <!-- CORPO -->
-  <div style="padding:32px">
-    <p style="margin:0 0 16px;font-size:14px;color:#2c3540">${sau},</p>
-    <p style="margin:0 0 24px;font-size:14px;color:#2c3540;line-height:1.6">
-      Entramos em contato para solicitar o posicionamento referente às <strong>Cartas de Débito</strong>
-      pendentes de pagamento listadas abaixo. Solicitamos gentilmente que nos informe a previsão de pagamento
-      ou efetue o depósito na conta indicada ao final deste e-mail.
-    </p>
-
-    <!-- TABELA -->
-    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px">
-      <thead>
-        <tr style="background:#0b6136">
-          <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Nº Carta</th>
-          <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Cliente / Remetente</th>
-          <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">NFO</th>
-          <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Valor</th>
-          <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Emissão</th>
-          <th style="padding:11px 14px;text-align:left;color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Em aberto</th>
-        </tr>
-      </thead>
-      <tbody>${linhasEmail}</tbody>
-      <tfoot>
-        <tr style="background:#e6f2ec">
-          <td colspan="3" style="padding:12px 14px;font-weight:700;color:#0a3922;font-size:14px">TOTAL PENDENTE</td>
-          <td colspan="3" style="padding:12px 14px;font-family:monospace;font-weight:700;font-size:16px;color:#0a3922">R$ ${formatMoeda(totalTransp)}</td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <p style="margin:24px 0 8px;font-size:13px;color:#5a6472">
-      Em caso de dúvidas ou para envio do comprovante, entre em contato com o Departamento de Logística da Apis Flora.
-    </p>
-
-    <!-- DADOS BANCÁRIOS -->
-    <div style="background:#f4f5f6;border-radius:10px;padding:18px 20px;margin-top:20px">
-      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#5a6472;margin-bottom:10px">Dados para pagamento</div>
-      <table style="font-size:13px;color:#2c3540;border-collapse:collapse">
-        <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#5a6472">Banco</td><td style="padding:3px 0"><strong>Banco do Brasil</strong></td></tr>
-        <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#5a6472">Agência</td><td style="padding:3px 0"><strong>3235-2</strong></td></tr>
-        <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#5a6472">Conta</td><td style="padding:3px 0"><strong>160.197-0</strong></td></tr>
-        <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#5a6472">CNPJ</td><td style="padding:3px 0"><strong>49.345.358/0001-45</strong></td></tr>
-      </table>
-    </div>
-  </div>
-
-  <!-- RODAPÉ -->
-  <div style="background:#0a3922;padding:16px 32px;text-align:center">
-    <div style="color:rgba(255,255,255,0.7);font-size:11px">
-      Apis Flora Indl. e Coml. Ltda. · Rua Triunfo, 945 · Ribeirão Preto/SP · (16) 3514-4444
-    </div>
-  </div>
-
-</div>
-</body></html>`;
-
-  // Copiar HTML para clipboard
-  const blob = new Blob([emailHtml], {type: 'text/html'});
-  const clipItem = new ClipboardItem({'text/html': blob});
-  navigator.clipboard.write([clipItem]).then(() => {
-    toast('E-mail copiado! Cole direto no Outlook (Ctrl+V)', 'success');
-  }).catch(() => {
-    // Fallback: abrir em nova janela
-    const win = window.open('','_blank','width=800,height=600');
-    win.document.write(emailHtml);
-    win.document.close();
-    toast('E-mail aberto em nova aba — selecione tudo e copie', 'warn');
-  });
+  // Abre janela com botão de copiar
+  const win = window.open('','_blank','width=860,height=720');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>E-mail de Cobrança — ${transp}</title>
+    <style>
+      body{margin:0;padding:70px 20px 20px;background:#f4f5f6;font-family:Arial,sans-serif}
+      #btnCopiar{position:fixed;top:12px;left:50%;transform:translateX(-50%);padding:12px 32px;background:#0b6136;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:999;white-space:nowrap}
+      #btnCopiar:hover{background:#0a3922}
+      #email-wrap{max-width:700px;margin:0 auto;box-shadow:0 4px 20px rgba(0,0,0,0.12)}
+    </style>
+  </head><body>
+    <button id="btnCopiar" onclick="copiar()">📋 Copiar e-mail para colar no Outlook</button>
+    <div id="email-wrap">${emailHtml}</div>
+    <scr"+"ipt>
+    function copiar() {
+      const el = document.getElementById('email-wrap');
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      try {
+        document.execCommand('copy');
+        document.getElementById('btnCopiar').textContent = '✅ Copiado! Cole no Outlook com Ctrl+V';
+        document.getElementById('btnCopiar').style.background = '#27ae60';
+        setTimeout(() => {
+          document.getElementById('btnCopiar').textContent = '📋 Copiar e-mail para colar no Outlook';
+          document.getElementById('btnCopiar').style.background = '#0b6136';
+        }, 3000);
+      } catch(e) {
+        alert('Selecione todo o conteúdo (Ctrl+A) e copie (Ctrl+C)');
+      }
+      sel.removeAllRanges();
+    }
+    <\/scr"+"ipt>
+  </body></html>`);
+  win.document.close();
+  toast('E-mail aberto! Clique em "Copiar e-mail" na nova janela.', 'success');
 }
 
 function switchTab(tab,btn) {
