@@ -1648,78 +1648,39 @@ function renderizarCobrancas() {
 
 function copiarEmailCobranca(transp, cartas) {
   const sau = saudacao();
-  const totalTransp = cartas.reduce((s,h) => s+parseFloat(h.total||0), 0);
-
-  // Montar linhas da tabela em texto simples para o e-mail
-  const linhas = cartas
-    .sort((a,b) => parseInt(b.numero||0) - parseInt(a.numero||0))
-    .map(h => {
+  const total = cartas.reduce((s,h) => s+parseFloat(h.total||0), 0);
+  
+  let texto = sau + ',\n\n';
+  texto += 'Segue relação de Cartas de Débito pendentes de pagamento:\n\n';
+  texto += 'TRANSPORTADORA: ' + transp + '\n';
+  texto += '─'.repeat(60) + '\n\n';
+  
+  cartas.sort((a,b) => parseInt(b.numero||0)-parseInt(a.numero||0))
+    .forEach(h => {
       const dias = diasEmAberto(h.data_geracao);
-      return `Carta ${h.numero} | ${h.cliente} | NFO ${h.nfo} | R$ ${formatMoeda(parseFloat(h.total||0))} | Emitida: ${(h.data_geracao||"").split(" ")[0]} | ${dias} dias em aberto`;
-    }).join('\n');
+      texto += 'Nº ' + h.numero + '\n';
+      texto += 'Cliente: ' + h.cliente + '\n';
+      texto += 'NFO: ' + h.nfo + '\n';
+      texto += 'Valor: R$ ' + formatMoeda(parseFloat(h.total||0)) + '\n';
+      texto += 'Emissão: ' + (h.data_geracao||'').split(' ')[0] + ' (' + dias + ' dias em aberto)\n\n';
+    });
+  
+  texto += '─'.repeat(60) + '\n';
+  texto += 'TOTAL PENDENTE: R$ ' + formatMoeda(total) + '\n\n';
+  texto += 'Dados para pagamento:\n';
+  texto += 'Banco do Brasil | Ag: 3235-2 | CC: 160.197-0 | CNPJ: 49.345.358/0001-45\n\n';
+  texto += 'Atenciosamente,\nDepto. Logística — Apis Flora Indl. e Coml. Ltda.';
 
-  // Texto do e-mail
-  const corpo = `${sau},
-
-Entramos em contato para solicitar o posicionamento referente às Cartas de Débito pendentes de pagamento listadas abaixo.
-Solicitamos gentilmente que nos informe a previsão de pagamento ou efetue o depósito na conta indicada ao final deste e-mail.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CARTAS DE DÉBITO PENDENTES — ${transp}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-${linhas}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TOTAL PENDENTE: R$ ${formatMoeda(totalTransp)}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-DADOS PARA PAGAMENTO:
-Banco: Banco do Brasil
-Agência: 3235-2
-Conta Corrente: 160.197-0
-CNPJ: 49.345.358/0001-45
-
-Em caso de dúvidas, entre em contato com o Departamento de Logística da Apis Flora.
-
-Atenciosamente,
-Departamento de Logística
-Apis Flora Indl. e Coml. Ltda.
-Rua Triunfo, 945 — Ribeirão Preto/SP
-(16) 3514-4444`;
-
-  // Copiar texto simples para clipboard
-  navigator.clipboard.writeText(corpo).then(() => {
-    toast('✅ E-mail copiado! Cole no Outlook com Ctrl+V', 'success');
-  }).catch(() => {
-    // Fallback: mostrar em textarea para copiar manualmente
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
-    overlay.innerHTML = `<div style="background:white;border-radius:14px;max-width:600px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <h3 style="font-size:15px;font-weight:700;color:#2c3540">📧 E-mail — ${transp.replace(/'/g,"\'")}</h3>
-        <button onclick="this.closest('div[style]').remove()" style="background:#f4f5f6;border:none;border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:16px">×</button>
-      </div>
-      <textarea id="txt-email-cob" style="width:100%;height:320px;padding:12px;border:1.5px solid #e8eaec;border-radius:8px;font-family:monospace;font-size:12px;resize:none;outline:none">${corpo.replace(/</g,'&lt;')}</textarea>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button onclick="copiarTextoCob(this)"
-          style="flex:1;padding:11px;background:#0b6136;color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">
-          📋 Selecionar e Copiar
-        </button>
-        <button onclick="this.closest('div[style]').remove()"
-          style="padding:11px 20px;background:#f4f5f6;color:#5a6472;border:1.5px solid #e8eaec;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer">
-          Fechar
-        </button>
-      </div>
-    </div>`;
-    document.body.appendChild(overlay);
-    overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
-    // Selecionar o texto automaticamente
-    setTimeout(() => {
-      const ta = document.getElementById('txt-email-cob');
-      if(ta) ta.select();
-    }, 100);
-  });
+  // Abrir janela simples com textarea
+  var w = window.open('', '', 'width=600,height=500');
+  w.document.write('<html><body style="font-family:Arial;padding:16px">');
+  w.document.write('<h3 style="color:#0a3922">Selecione tudo (Ctrl+A) e copie (Ctrl+C)</h3>');
+  w.document.write('<textarea style="width:100%;height:380px;font-family:monospace;font-size:12px;padding:10px" id="t">');
+  w.document.write(texto.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+  w.document.write('</textarea>');
+  w.document.write('<script>document.getElementById("t").select();<\/script>');
+  w.document.write('</body></html>');
+  w.document.close();
 }
 
 
@@ -1966,15 +1927,7 @@ function fecharModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
 });
-function copiarTextoCob(btn) {
-  const ta = document.getElementById('txt-email-cob');
-  if(ta) {
-    ta.select();
-    document.execCommand('copy');
-    btn.textContent = '✅ Copiado!';
-    setTimeout(() => { btn.textContent = '📋 Selecionar e Copiar'; }, 2000);
-  }
-}
+
 
 let toastTimer;
 function toast(msg,tipo='success'){
