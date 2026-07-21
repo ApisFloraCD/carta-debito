@@ -31,7 +31,7 @@
   .sync-dot.off{background:#f87171}
   .sync-dot.loading{background:#fbbf24;animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-  .main{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+  .main{max-width:1600px;margin:0 auto;padding:28px 32px 60px}
   .card{background:var(--branco);border-radius:14px;box-shadow:var(--sombra);overflow:hidden;margin-bottom:18px}
   .card-header{padding:14px 22px;border-bottom:1px solid var(--cinza-200);display:flex;align-items:center;gap:10px}
   .card-header-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
@@ -136,7 +136,7 @@
   </div>
   <div class="header-right">
     <div class="sync-status" id="sync-status">
-      <span class="sync-dot loading" id="sync-dot"></span>
+      <span class="sync-dot" id="sync-dot" style="background:#fbbf24"></span>
       <span id="sync-text">Conectando...</span>
     </div>
   </div>
@@ -478,7 +478,7 @@ async function sbFetch(path, method='GET', body=null) {
   };
   if(method === 'POST') headers['Prefer'] = 'return=representation';
   if(method === 'PATCH') headers['Prefer'] = 'return=minimal';
-  const opts = { method, headers };
+  const opts = { method, headers, mode: 'cors' };
   if(body) opts.body = JSON.stringify(body);
   // Timeout de 10s via Promise.race
   const timeout = new Promise((_, reject) =>
