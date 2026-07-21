@@ -1892,9 +1892,12 @@ async function carregarEmailsTransp() {
 function salvarEmailsTransp(obj) {
   localStorage.setItem('apis_emails_transp', JSON.stringify(obj));
 }
-async function salvarEmailTranspIdx(idx, email) {
+async function salvarEmailTranspIdx(idx) {
   const arr = carregarTransportadoras();
   if(idx < 0 || idx >= arr.length) return;
+  const input = document.getElementById('email-transp-' + idx);
+  if(!input) return;
+  const email = input.value.trim();
   await salvarEmailTransp(arr[idx], email);
 }
 
@@ -1926,10 +1929,10 @@ function renderizarTransportadoras() {
       </div>
       <div style="display:flex;align-items:center;gap:8px;width:100%">
         <span style="font-size:11px;color:var(--cinza-400);min-width:50px">E-mail:</span>
-        <input type="email" placeholder="email@transportadora.com.br" value="${em}"
-          onchange="salvarEmailTranspIdx(${i}, this.value)"
+        <input type="email" id="email-transp-${i}" placeholder="email@transportadora.com.br" value="${em}"
           style="flex:1;height:32px;padding:0 10px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12.5px;outline:none"
           onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--cinza-200)'">
+        <button class="btn-sm verde" onclick="salvarEmailTranspIdx(${i})" style="white-space:nowrap">💾 Salvar</button>
       </div>
     </div>`;
   }).join('');
