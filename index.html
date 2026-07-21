@@ -491,6 +491,24 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- MODAL E-MAIL COBRANÇA -->
+<div id="modal-email-cob" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
+  <div style="background:white;border-radius:14px;max-width:760px;width:100%;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="padding:16px 22px;border-bottom:1px solid #e8eaec;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:10;border-radius:14px 14px 0 0">
+      <h3 style="font-size:15px;font-weight:700;color:#2c3540">📧 E-mail de Cobrança</h3>
+      <div style="display:flex;gap:8px">
+        <button id="btn-copiar-email-cob" onclick="copiarEmailModal()"
+          style="padding:9px 20px;background:#0b6136;color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">
+          📋 Copiar para Outlook
+        </button>
+        <button onclick="fecharModalEmail()"
+          style="width:32px;height:32px;border:none;background:#f4f5f6;border-radius:7px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">×</button>
+      </div>
+    </div>
+    <div id="email-cob-conteudo" style="padding:0"></div>
+  </div>
+</div>
 <input type="file" id="upload-assin-input" class="upload-assin" accept="image/*" onchange="processarUploadAssin(event)">
 
 <script>
@@ -23899,7 +23917,7 @@ function copiarEmailCobranca(transp, cartas) {
     }).join('');
 
   const emailHtml = `
-    <div style="font-family:Arial,sans-serif;max-width:700px">
+    <div id="email-corpo-real" style="font-family:Arial,sans-serif">
       <div style="background:linear-gradient(135deg,#0a3922 0%,#0b6136 100%);padding:24px 32px;display:flex;align-items:center;gap:16px">
         <img src="${LOGO_B64_COB}" style="height:50px" alt="Apis Flora">
         <div>
@@ -23953,44 +23971,38 @@ function copiarEmailCobranca(transp, cartas) {
       </div>
     </div>`;
 
-  // Abre janela com botão de copiar
-  const win = window.open('','_blank','width=860,height=720');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>E-mail de Cobrança — ${transp}</title>
-    <style>
-      body{margin:0;padding:70px 20px 20px;background:#f4f5f6;font-family:Arial,sans-serif}
-      #btnCopiar{position:fixed;top:12px;left:50%;transform:translateX(-50%);padding:12px 32px;background:#0b6136;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:999;white-space:nowrap}
-      #btnCopiar:hover{background:#0a3922}
-      #email-wrap{max-width:700px;margin:0 auto;box-shadow:0 4px 20px rgba(0,0,0,0.12)}
-    </style>
-  </head><body>
-    <button id="btnCopiar" onclick="copiar()">📋 Copiar e-mail para colar no Outlook</button>
-    <div id="email-wrap">${emailHtml}</div>
-    <scr"+"ipt>
-    function copiar() {
-      const el = document.getElementById('email-wrap');
-      const range = document.createRange();
-      range.selectNodeContents(el);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-      try {
-        document.execCommand('copy');
-        document.getElementById('btnCopiar').textContent = '✅ Copiado! Cole no Outlook com Ctrl+V';
-        document.getElementById('btnCopiar').style.background = '#27ae60';
-        setTimeout(() => {
-          document.getElementById('btnCopiar').textContent = '📋 Copiar e-mail para colar no Outlook';
-          document.getElementById('btnCopiar').style.background = '#0b6136';
-        }, 3000);
-      } catch(e) {
-        alert('Selecione todo o conteúdo (Ctrl+A) e copie (Ctrl+C)');
-      }
-      sel.removeAllRanges();
-    }
-    <\/scr"+"ipt>
-  </body></html>`);
-  win.document.close();
-  toast('E-mail aberto! Clique em "Copiar e-mail" na nova janela.', 'success');
+  // Mostrar no modal interno (sem popup)
+  const modal = document.getElementById('modal-email-cob');
+  const conteudo = document.getElementById('email-cob-conteudo');
+  conteudo.innerHTML = emailHtml;
+  modal.style.display = 'flex';
+}
+
+function copiarEmailModal() {
+  const el = document.getElementById('email-corpo-real');
+  if(!el) return;
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try {
+    document.execCommand('copy');
+    const btn = document.getElementById('btn-copiar-email-cob');
+    btn.textContent = '✅ Copiado! Cole no Outlook (Ctrl+V)';
+    btn.style.background = '#27ae60';
+    setTimeout(() => {
+      btn.textContent = '📋 Copiar para Outlook';
+      btn.style.background = '#0b6136';
+    }, 3000);
+  } catch(e) {
+    toast('Use Ctrl+A para selecionar tudo e Ctrl+C para copiar', 'warn');
+  }
+  sel.removeAllRanges();
+}
+
+function fecharModalEmail() {
+  document.getElementById('modal-email-cob').style.display = 'none';
 }
 
 function switchTab(tab,btn) {
@@ -24230,6 +24242,9 @@ function limparFormulario() {
 }
 function abrirModal(id){document.getElementById(id).classList.add('open');}
 function fecharModal(id){document.getElementById(id).classList.remove('open');}
+document.getElementById('modal-email-cob').addEventListener('click', e => {
+  if(e.target === document.getElementById('modal-email-cob')) fecharModalEmail();
+});
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
 });
