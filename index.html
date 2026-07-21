@@ -1543,107 +1543,167 @@ function diasEmAberto(dataStr) {
 function renderizarCobrancas() {
   const filtroTransp = document.getElementById('cob-transp')?.value || '';
   const filtroDias   = parseInt(document.getElementById('cob-dias')?.value || '0');
-
-  // Apenas cartas em análise
   let pendentes = historico.filter(h => h.tipo === 'carta' && h.status === 'EM ANÁLISE');
-
-  // Popular select de transportadoras
   const selT = document.getElementById('cob-transp');
   if(selT) {
-    const atual = selT.value;
-    const transps = [...new Set(pendentes.map(h => h.transp).filter(Boolean))].sort();
-    selT.innerHTML = '<option value="">Todas as transportadoras</option>' +
-      transps.map(t => `<option ${t===atual?'selected':''} value="${t}">${t}</option>`).join('');
+    const at = selT.value;
+    const ts = [...new Set(pendentes.map(h=>h.transp).filter(Boolean))].sort();
+    selT.innerHTML = '<option value="">Todas as transportadoras</option>' + ts.map(t=>`<option ${t===at?'selected':''} value="${t}">${t}</option>`).join('');
   }
-
-  if(filtroTransp) pendentes = pendentes.filter(h => h.transp === filtroTransp);
-  if(filtroDias > 0) pendentes = pendentes.filter(h => diasEmAberto(h.data_geracao) >= filtroDias);
-
-  // Agrupar por transportadora
+  if(filtroTransp) pendentes = pendentes.filter(h=>h.transp===filtroTransp);
+  if(filtroDias>0) pendentes = pendentes.filter(h=>diasEmAberto(h.data_geracao)>=filtroDias);
   const grupos = {};
-  pendentes.forEach(h => {
-    const t = h.transp || '—';
-    if(!grupos[t]) grupos[t] = [];
-    grupos[t].push(h);
-  });
-
-  const totalGeral = pendentes.reduce((s,h) => s + parseFloat(h.total||0), 0);
+  pendentes.forEach(h=>{const t=h.transp||'—';if(!grupos[t])grupos[t]=[];grupos[t].push(h);});
+  const totalGeral = pendentes.reduce((s,h)=>s+parseFloat(h.total||0),0);
   const resumoEl = document.getElementById('cob-resumo');
   if(resumoEl) resumoEl.innerHTML = `<strong>${pendentes.length}</strong> cartas pendentes · <strong>R$ ${formatMoeda(totalGeral)}</strong> em aberto`;
-
   const lista = document.getElementById('cob-lista');
   if(!lista) return;
-
-  if(!pendentes.length) {
-    lista.innerHTML = `<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--cinza-400)">
-      ✅ Nenhuma carta em análise no momento!
-    </div></div>`;
-    return;
-  }
-
+  if(!pendentes.length){lista.innerHTML='<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--cinza-400)">✅ Nenhuma carta em análise!</div></div>';return;}
+  
   lista.innerHTML = Object.entries(grupos)
-    .sort((a,b) => b[1].reduce((s,h)=>s+parseFloat(h.total||0),0) - a[1].reduce((s,h)=>s+parseFloat(h.total||0),0))
-    .map(([transp, cartas]) => {
-      const totalTransp = cartas.reduce((s,h) => s+parseFloat(h.total||0), 0);
-      const maxDias = Math.max(...cartas.map(h => diasEmAberto(h.data_geracao)));
-      const alertColor = maxDias >= 60 ? '#c0392b' : maxDias >= 30 ? '#d4600a' : '#856404';
-      const alertBg    = maxDias >= 60 ? '#fde8e8' : maxDias >= 30 ? '#fdf0e6' : '#fef3cd';
+    .sort((a,b)=>b[1].reduce((s,h)=>s+parseFloat(h.total||0),0)-a[1].reduce((s,h)=>s+parseFloat(h.total||0),0))
+    .map(([transp,cartas],gi)=>{
+      const totalT = cartas.reduce((s,h)=>s+parseFloat(h.total||0),0);
+      const maxD   = Math.max(...cartas.map(h=>diasEmAberto(h.data_geracao)));
+      const aC     = maxD>=60?'#c0392b':maxD>=30?'#d4600a':'#856404';
+      const aBg    = maxD>=60?'#fde8e8':maxD>=30?'#fdf0e6':'#fef3cd';
+      
+      // Montar texto do email aqui mesmo
+      const sau = saudacao();
+      const sorted = cartas.sort((a,b)=>parseInt(b.numero||0)-parseInt(a.numero||0));
+      // Montar tabela HTML para o email
+      const linhasHtml = sorted.map(h => {
+        const dias = diasEmAberto(h.data_geracao);
+        const dc = dias>=60?'#c0392b':dias>=30?'#e67e22':'#2c3540';
+        return '<tr>'
+          +'<td style="padding:8px 12px;border:1px solid #ddd;font-weight:600;color:#0a3922">'+h.numero+'</td>'
+          +'<td style="padding:8px 12px;border:1px solid #ddd">'+h.cliente+'</td>'
+          +'<td style="padding:8px 12px;border:1px solid #ddd">'+h.nfo+'</td>'
+          +'<td style="padding:8px 12px;border:1px solid #ddd;font-family:monospace">R$ '+formatMoeda(parseFloat(h.total||0))+'</td>'
+          +'<td style="padding:8px 12px;border:1px solid #ddd;color:'+dc+';font-weight:bold">'+dias+'d</td>'
+          +'</tr>';
+      }).join('');
+      const ems = carregarEmailsTransp();
+      const emailDest = ems[transp] || '';
+      const emailAssunto = 'Cartas de Débito Pendentes — ' + transp;
+      const emailHtml = '<div style="font-family:Arial,sans-serif;font-size:13px;color:#2c3540">'
+        +'<p>'+sau+',</p>'
+        +'<p>Segue relação de <b>Cartas de Débito pendentes</b> de pagamento da transportadora <b>'+transp+'</b>.<br>'
+        +'Solicitamos posicionamento sobre o prazo de pagamento.</p>'
+        +'<table style="border-collapse:collapse;width:100%;font-size:13px">'
+        +'<thead><tr style="background:#0b6136">'
+        +'<th style="padding:9px 12px;border:1px solid #0a3922;color:white;text-align:left">Nº Carta</th>'
+        +'<th style="padding:9px 12px;border:1px solid #0a3922;color:white;text-align:left">Cliente</th>'
+        +'<th style="padding:9px 12px;border:1px solid #0a3922;color:white;text-align:left">NFO</th>'
+        +'<th style="padding:9px 12px;border:1px solid #0a3922;color:white;text-align:left">Valor</th>'
+        +'<th style="padding:9px 12px;border:1px solid #0a3922;color:white;text-align:left">Em aberto</th>'
+        +'</tr></thead>'
+        +'<tbody>'+linhasHtml+'</tbody>'
+        +'<tfoot><tr style="background:#e6f2ec">'
+        +'<td colspan="3" style="padding:9px 12px;border:1px solid #ddd;font-weight:bold;color:#0a3922">TOTAL PENDENTE</td>'
+        +'<td colspan="2" style="padding:9px 12px;border:1px solid #ddd;font-weight:bold;color:#0a3922;font-family:monospace">R$ '+formatMoeda(totalT)+'</td>'
+        +'</tr></tfoot>'
+        +'</table>'
 
-      const linhasTabela = cartas
-        .sort((a,b) => parseInt(b.numero||0) - parseInt(a.numero||0))
-        .map(h => {
-          const dias = diasEmAberto(h.data_geracao);
-          const diasColor = dias >= 60 ? '#c0392b' : dias >= 30 ? '#d4600a' : dias >= 15 ? '#856404' : '#2c3540';
-          return `<tr>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;color:#0a3922">${h.numero}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${h.cliente}">${h.cliente}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#5a6472">${h.nfo}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:monospace;font-weight:600">R$ ${formatMoeda(parseFloat(h.total||0))}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#5a6472;white-space:nowrap">${(h.data_geracao||'').split(' ')[0]}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:700;color:${diasColor};white-space:nowrap">${dias}d</td>
-          </tr>`;
-        }).join('');
-
+        +'</div>';
+      const emailTxt = emailHtml;
+      
+      const linhas = cartas.sort((a,b)=>parseInt(b.numero||0)-parseInt(a.numero||0)).map(h=>{
+        const d=diasEmAberto(h.data_geracao);
+        const dc=d>=60?'#c0392b':d>=30?'#d4600a':d>=15?'#856404':'#2c3540';
+        return `<tr><td style="padding:7px 10px;border-bottom:1px solid #eee;font-weight:600;color:#0a3922">${h.numero}</td><td style="padding:7px 10px;border-bottom:1px solid #eee">${h.cliente}</td><td style="padding:7px 10px;border-bottom:1px solid #eee">${h.nfo}</td><td style="padding:7px 10px;border-bottom:1px solid #eee;font-family:monospace">R$ ${formatMoeda(parseFloat(h.total||0))}</td><td style="padding:7px 10px;border-bottom:1px solid #eee">${(h.data_geracao||'').split(' ')[0]}</td><td style="padding:7px 10px;border-bottom:1px solid #eee;font-weight:700;color:${dc}">${d}d</td></tr>`;
+      }).join('');
+      
       return `<div class="card" style="margin-bottom:18px">
         <div class="card-header" style="justify-content:space-between">
           <div style="display:flex;align-items:center;gap:10px">
             <div class="card-header-icon verde">🚚</div>
             <h2>${transp}</h2>
-            <span style="background:${alertBg};color:${alertColor};padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700">
-              ${cartas.length} carta${cartas.length>1?'s':''} · ${maxDias}d em aberto
-            </span>
+            <span style="background:${aBg};color:${aC};padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700">${cartas.length} carta${cartas.length>1?'s':''} · ${maxD}d em aberto</span>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
-            <span style="font-family:monospace;font-weight:700;font-size:15px;color:var(--verde-escuro)">R$ ${formatMoeda(totalTransp)}</span>
-            <button onclick="copiarEmailCobranca('${transp.replace(/'/g,"\'")}', ${JSON.stringify(cartas).replace(/'/g,"\'")})"
-              style="padding:7px 16px;background:var(--verde);color:white;border:none;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer">
-              📋 Copiar e-mail
+            <span style="font-family:monospace;font-weight:700;font-size:15px;color:var(--verde-escuro)">R$ ${formatMoeda(totalT)}</span>
+            <button id="btn-cob-${gi}" style="padding:7px 16px;background:var(--verde);color:white;border:none;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer" onclick="toggleEmail(${gi})">
+              📋 Ver texto do e-mail
             </button>
           </div>
         </div>
         <div class="card-body" style="padding:0;overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;font-size:13px">
-            <thead>
-              <tr style="background:var(--cinza-100)">
-                <th style="padding:9px 12px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Nº Carta</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Cliente</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">NFO</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Valor</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Emissão</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Em aberto</th>
-              </tr>
-            </thead>
-            <tbody>${linhasTabela}</tbody>
-            <tfoot>
-              <tr style="background:var(--verde-claro)">
-                <td colspan="3" style="padding:10px 12px;font-weight:700;color:var(--verde-escuro)">TOTAL PENDENTE</td>
-                <td colspan="3" style="padding:10px 12px;font-family:monospace;font-weight:700;font-size:14px;color:var(--verde-escuro)">R$ ${formatMoeda(totalTransp)}</td>
-              </tr>
-            </tfoot>
+            <thead><tr style="background:var(--cinza-100)">
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Nº</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Cliente</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">NFO</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Valor</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Emissão</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200)">Em aberto</th>
+            </tr></thead>
+            <tbody>${linhas}</tbody>
+            <tfoot><tr style="background:var(--verde-claro)">
+              <td colspan="3" style="padding:9px 10px;font-weight:700;color:var(--verde-escuro)">TOTAL</td>
+              <td colspan="3" style="padding:9px 10px;font-family:monospace;font-weight:700;color:var(--verde-escuro)">R$ ${formatMoeda(totalT)}</td>
+            </tr></tfoot>
           </table>
+          <div id="email-div-${gi}" style="display:none;padding:16px;background:#f9fafb;border-top:1.5px solid var(--cinza-200)">
+            <div style="background:#f0f7f3;border-radius:8px;padding:12px 14px;margin-bottom:12px;border:1px solid #b2d9c3">
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+                <span style="font-size:11px;font-weight:700;color:var(--cinza-600);min-width:60px;text-transform:uppercase">Para:</span>
+                <span id="dest-${gi}" style="font-size:13px;color:#0a3922;font-weight:600">${emailDest || '<span style=\'color:var(--cinza-400);font-style:italic\'>Nenhum e-mail cadastrado — adicione nas Configurações</span>'}</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span style="font-size:11px;font-weight:700;color:var(--cinza-600);min-width:60px;text-transform:uppercase">Assunto:</span>
+                <span style="font-size:13px;color:#0a3922">${emailAssunto}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <p style="font-size:12px;font-weight:600;color:var(--cinza-600);margin:0">Selecione o conteúdo abaixo e copie (Ctrl+C) para colar no Outlook:</p>
+              <div style="display:flex;gap:6px">
+                ${emailDest ? `<button onclick="abrirOutlook(${gi},'${emailDest.replace(/'/g,"\\'")}','${emailAssunto.replace(/'/g,"\\'")}')" style="padding:7px 14px;background:#0b6136;color:white;border:none;border-radius:7px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer">✉️ Abrir no Outlook</button>` : ''}
+                <button onclick="selecionarEmail(${gi})" style="padding:7px 14px;background:#0b6136;color:white;border:none;border-radius:7px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer">📋 Selecionar tudo</button>
+              </div>
+            </div>
+            <div id="email-ta-${gi}" style="padding:16px;background:white;border:1.5px solid var(--cinza-200);border-radius:8px;font-family:Arial,sans-serif;font-size:13px;user-select:text">${emailTxt}</div>
+          </div>
         </div>
       </div>`;
     }).join('');
+}
+
+function abrirOutlook(gi, dest, assunto) {
+  const link = 'mailto:' + encodeURIComponent(dest)
+    + '?subject=' + encodeURIComponent(assunto);
+  window.location.href = link;
+}
+
+function toggleEmail(gi) {
+  const div = document.getElementById('email-div-' + gi);
+  const btn = document.getElementById('btn-cob-' + gi);
+  if(!div) return;
+  if(div.style.display === 'none') {
+    div.style.display = 'block';
+    btn.textContent = '✕ Fechar e-mail';
+  } else {
+    div.style.display = 'none';
+    btn.textContent = '📋 Ver texto do e-mail';
+  }
+}
+
+function selecionarEmail(gi) {
+  const el = document.getElementById('email-ta-' + gi);
+  if(!el) return;
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  // Tentar copiar
+  try {
+    document.execCommand('copy');
+    toast('Conteúdo copiado! Cole no Outlook com Ctrl+V', 'success');
+  } catch(e) {
+    toast('Conteúdo selecionado! Pressione Ctrl+C para copiar', 'warn');
+  }
 }
 
 function copiarEmailCobranca(transp, cartas) {
@@ -1801,14 +1861,40 @@ async function removerAssinatura(nome) {
 }
 
 // — TRANSPORTADORAS —
-async function renderizarTransportadoras() {
-  const el=document.getElementById('list-transportadoras');
-  if(!transportadoras.length){el.innerHTML='<div style="padding:12px 14px;color:var(--cinza-400);font-size:13px">Nenhuma cadastrada.</div>';return;}
-  el.innerHTML=transportadoras.map((t,i)=>`
-    <div class="config-item">
-      <span>${t}</span>
-      <button class="btn-sm del" onclick="excluirTransportadora(${i})">🗑 Excluir</button>
-    </div>`).join('');
+async function carregarEmailsTransp() {
+  return JSON.parse(localStorage.getItem('apis_emails_transp') || '{}');
+}
+function salvarEmailsTransp(obj) {
+  localStorage.setItem('apis_emails_transp', JSON.stringify(obj));
+}
+function salvarEmailTransp(transp, email) {
+  const ems = carregarEmailsTransp();
+  if(email) ems[transp] = email; else delete ems[transp];
+  salvarEmailsTransp(ems);
+  toast('E-mail salvo!', 'success');
+}
+
+function renderizarTransportadoras() {
+  const el  = document.getElementById('list-transportadoras');
+  const arr = carregarTransportadoras();
+  const ems = carregarEmailsTransp();
+  if(!arr.length){el.innerHTML='<div style="padding:12px 14px;color:var(--cinza-400);font-size:13px">Nenhuma cadastrada.</div>'; return;}
+  el.innerHTML = arr.map((t,i) => {
+    const em = ems[t]||'';
+    return `<div class="config-item" style="flex-direction:column;align-items:flex-start;gap:8px;padding:12px 14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+        <span style="font-weight:600;font-size:13px">${t}</span>
+        <button class="btn-sm del" onclick="excluirTransportadora(${i})">🗑 Excluir</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;width:100%">
+        <span style="font-size:11px;color:var(--cinza-400);min-width:50px">E-mail:</span>
+        <input type="email" placeholder="email@transportadora.com.br" value="${em}"
+          onchange="salvarEmailTransp('${t.replace(/'/g,"\'")}', this.value)"
+          style="flex:1;height:32px;padding:0 10px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12.5px;outline:none"
+          onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--cinza-200)'">
+      </div>
+    </div>`;
+  }).join('');
 }
 async function adicionarTransportadora() {
   const val=document.getElementById('new-transp').value.trim();
