@@ -31,7 +31,7 @@
   .sync-dot.off{background:#f87171}
   .sync-dot.loading{background:#fbbf24;animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-  .main{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+  .main{max-width:1600px;margin:0 auto;padding:28px 32px 60px}
   .card{background:var(--branco);border-radius:14px;box-shadow:var(--sombra);overflow:hidden;margin-bottom:18px}
   .card-header{padding:14px 22px;border-bottom:1px solid var(--cinza-200);display:flex;align-items:center;gap:10px}
   .card-header-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
@@ -88,8 +88,8 @@
   .modal-body{padding:22px}
   .modal-actions{padding:14px 22px;border-top:1px solid var(--cinza-200);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:white}
   .hist-table{width:100%;border-collapse:collapse;font-size:12.5px}
-  .hist-table th{padding:10px 13px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200);background:var(--cinza-100)}
-  .hist-table td{padding:9px 13px;border-bottom:1px solid var(--cinza-200);color:var(--cinza-800)}
+  .hist-table th{padding:7px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--cinza-600);border-bottom:1.5px solid var(--cinza-200);background:var(--cinza-100)}
+  .hist-table td{padding:6px 7px;border-bottom:1px solid var(--cinza-200);color:var(--cinza-800);font-size:12px}
   .hist-table tr:hover td{background:#fafbfc}
   .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:10.5px;font-weight:600}
   .badge-analise{background:#fef3cd;color:#856404} .badge-pago{background:var(--verde-claro);color:var(--verde-escuro)} .badge-recusado{background:#fde8e8;color:#c0392b}
@@ -227,25 +227,29 @@
         </div>
       </div>
       <div class="card-body" style="padding:14px 18px;border-bottom:1px solid var(--cinza-200)">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <input type="text" id="hist-busca" placeholder="🔍 Buscar por nº, cliente, transportadora..."
-            style="flex:1;min-width:200px;height:34px;padding:0 11px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12.5px;outline:none"
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="hist-busca" placeholder="🔍 Buscar por nº, cliente..."
+            style="flex:1;min-width:150px;height:34px;padding:0 11px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12px;outline:none"
             oninput="filtrarHistorico()" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--cinza-200)'">
+          <select id="hist-transp" onchange="filtrarHistorico()"
+            style="height:34px;padding:0 8px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12px;outline:none;color:var(--cinza-800)">
+            <option value="">Todas as transport.</option>
+          </select>
           <select id="hist-status" onchange="filtrarHistorico()"
-            style="height:34px;padding:0 10px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12.5px;outline:none;color:var(--cinza-800)">
+            style="height:34px;padding:0 8px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12px;outline:none;color:var(--cinza-800)">
             <option value="">Todos os status</option>
             <option>EM ANÁLISE</option><option>PAGO</option><option>RECUSADO</option>
           </select>
           <select id="hist-tipo" onchange="filtrarHistorico()"
-            style="height:34px;padding:0 10px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12.5px;outline:none;color:var(--cinza-800)">
+            style="height:34px;padding:0 8px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12px;outline:none;color:var(--cinza-800)">
             <option value="">Carta e Laudo</option>
             <option value="carta">Só Cartas</option><option value="laudo">Só Laudos</option>
           </select>
           <select id="hist-resp" onchange="filtrarHistorico()"
-            style="height:34px;padding:0 10px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12.5px;outline:none;color:var(--cinza-800)">
+            style="height:34px;padding:0 8px;border:1.5px solid var(--cinza-200);border-radius:7px;font-family:inherit;font-size:12px;outline:none;color:var(--cinza-800)">
             <option value="">Todos os responsáveis</option>
           </select>
-          <button onclick="limparFiltrosHistorico()" style="height:34px;padding:0 12px;border:1.5px solid var(--cinza-200);border-radius:7px;background:var(--cinza-100);font-family:inherit;font-size:12px;cursor:pointer;color:var(--cinza-600)">✕ Limpar</button>
+          <button onclick="limparFiltrosHistorico()" style="height:34px;padding:0 10px;border:1.5px solid var(--cinza-200);border-radius:7px;background:var(--cinza-100);font-family:inherit;font-size:12px;cursor:pointer;color:var(--cinza-600)">✕ Limpar</button>
         </div>
       </div>
       <div class="card-body" style="padding:0">
@@ -1156,6 +1160,7 @@ function renderizarHistorico() {
     return ordemHistorico.direcao==='asc'?(va>vb?1:-1):(va<vb?1:-1);
   });
   popularFiltroResponsavel();
+  popularFiltroTransportadoraHist();
   const badges={'EM ANÁLISE':'badge-analise','PAGO':'badge-pago','RECUSADO':'badge-recusado'};
   historico.forEach((h,i)=>{
     // Verificar se tem par (carta tem laudo ou vice-versa)
@@ -1164,8 +1169,8 @@ function renderizarHistorico() {
       ? (temPar ? '<span style="font-size:10.5px;background:#e6f2ec;color:#0a3922;padding:2px 7px;border-radius:10px;font-weight:600">📄+📋</span>' : '<span style="font-size:10.5px;background:#fff8d6;color:#856404;padding:2px 7px;border-radius:10px;font-weight:600">📄 Carta</span>')
       : (temPar ? '<span style="font-size:10.5px;background:#e6f2ec;color:#0a3922;padding:2px 7px;border-radius:10px;font-weight:600">📄+📋</span>' : '<span style="font-size:10.5px;background:#fdf0e6;color:#8c4a00;padding:2px 7px;border-radius:10px;font-weight:600">📋 Laudo</span>');
     const tr=document.createElement('tr');
-    tr.dataset.numero=h.numero; tr.dataset.status=h.status; tr.dataset.tipo=h.tipo;
-    tr.dataset.resp=h.responsavel||''; tr.dataset.busca=`${h.numero} ${h.cliente} ${h.transp} ${h.nfo}`.toLowerCase();
+    tr.dataset.index=i; tr.dataset.numero=h.numero; tr.dataset.status=h.status; tr.dataset.tipo=h.tipo;
+    tr.dataset.resp=h.responsavel||''; tr.dataset.transp=h.transp||''; tr.dataset.busca=`${h.numero} ${h.cliente} ${h.transp} ${h.nfo}`.toLowerCase();
     tr.innerHTML=`
       <td style="font-size:11px;white-space:nowrap">${h.data_geracao||h.dataGeracao||''}</td>
       <td style="font-family:monospace;font-weight:600">${h.numero}</td>
@@ -1225,12 +1230,14 @@ function ordenarHistorico(campo) {
 
 function filtrarHistorico() {
   const busca  = (document.getElementById('hist-busca')?.value||'').toLowerCase();
+  const transp = document.getElementById('hist-transp')?.value||'';
   const status = document.getElementById('hist-status')?.value||'';
   const tipo   = document.getElementById('hist-tipo')?.value||'';
   const resp   = document.getElementById('hist-resp')?.value||'';
   document.querySelectorAll('#historico-body tr').forEach(tr => {
     const ok =
       (!busca  || tr.dataset.busca?.includes(busca)) &&
+      (!transp || tr.dataset.transp === transp) &&
       (!status || tr.dataset.status === status) &&
       (!tipo   || tr.dataset.tipo === tipo) &&
       (!resp   || tr.dataset.resp === resp);
@@ -1239,7 +1246,7 @@ function filtrarHistorico() {
 }
 
 function limparFiltrosHistorico() {
-  ['hist-busca','hist-status','hist-tipo','hist-resp'].forEach(id => {
+  ['hist-busca','hist-transp','hist-status','hist-tipo','hist-resp'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.value = '';
   });
@@ -1255,6 +1262,20 @@ function popularFiltroResponsavel() {
   nomes.forEach(n => {
     const opt = document.createElement('option');
     opt.value = n; opt.textContent = n;
+    if(n===atual) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function popularFiltroTransportadoraHist() {
+  const sel = document.getElementById('hist-transp');
+  if(!sel) return;
+  const atual = sel.value;
+  sel.innerHTML = '<option value="">Todas as transport.</option>';
+  const nomes = [...new Set(historico.map(h=>h.transp).filter(Boolean))].sort();
+  nomes.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n; opt.textContent = n.split(' ')[0];
     if(n===atual) opt.selected = true;
     sel.appendChild(opt);
   });
