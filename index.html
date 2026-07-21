@@ -564,7 +564,7 @@ async function tentarSupabase() {
   try {
     const [assinDB, transpDB, histDB] = await Promise.all([
       sbFetch('carta_assinaturas?select=*&order=nome'),
-      sbFetch('carta_transportadoras?select=nome,email&ativo=eq.true&order=nome'),
+      sbFetch('carta_transportadoras?select=id,nome,email&ativo=eq.true&order=nome'),
       sbFetch('carta_historico?select=*&order=created_at.desc&limit=200')
     ]);
 
@@ -578,8 +578,12 @@ async function tentarSupabase() {
       salvarCacheAssinaturas();
     }
     if(transpDB && transpDB.length) {
+      window.transpDBData = transpDB;
       transportadoras = transpDB.map(t => t.nome);
       localStorage.setItem('apis_transportadoras', JSON.stringify(transportadoras));
+      const ems = carregarEmailsTransp();
+      transpDB.forEach(t => { if(t.email) ems[t.nome] = t.email; });
+      salvarEmailsTransp(ems);
     }
     if(histDB) {
       historico = histDB;
@@ -1577,13 +1581,22 @@ async function salvarEmailTranspIdx(idx) {
   if(!input) return;
   const email = input.value.trim();
   try {
-    await sbFetch('carta_transportadoras?nome=eq.' + encodeURIComponent(transp), 'PATCH', {email: email||null});
+    // Usar ID se disponível, senão usar nome com encode correto
+    let path;
+    if(window.transpDBData) {
+      const found = window.transpDBData.find(t => t.nome === transp);
+      if(found && found.id) {
+        path = 'carta_transportadoras?id=eq.' + found.id;
+      }
+    }
+    if(!path) path = 'carta_transportadoras?nome=eq.' + encodeURIComponent(transp);
+    await sbFetch(path, 'PATCH', {email: email||null});
     const ems = carregarEmailsTransp();
     if(email) ems[transp] = email; else delete ems[transp];
     salvarEmailsTransp(ems);
     toast('E-mail salvo!', 'success');
   } catch(e) {
-    console.error('Erro:', e);
+    console.error('Erro ao salvar:', e);
     toast('Erro ao salvar.', 'error');
   }
 }
