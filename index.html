@@ -457,9 +457,17 @@
         <div id="msgs-carta"></div>
       </div>
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="fecharModal('modal-carta')">Fechar</button>
-      <button class="btn btn-primary" onclick="imprimirDoc('carta')">🖨️ Imprimir / Salvar PDF</button>
+    <div class="modal-actions" style="flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px;width:100%;padding:0 4px">
+        <span style="font-size:11.5px;font-weight:600;color:var(--cinza-600);white-space:nowrap">📁 Nome sugerido:</span>
+        <input id="nome-arquivo-carta" type="text" readonly onclick="this.select()"
+          style="flex:1;height:30px;padding:0 10px;border:1.5px solid var(--cinza-200);border-radius:6px;font-family:monospace;font-size:11.5px;background:#f9fafb;color:#0a3922;cursor:text;outline:none">
+        <button onclick="copiarNome('nome-arquivo-carta')" style="height:30px;padding:0 12px;background:#0b6136;color:white;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">📋</button>
+      </div>
+      <div style="display:flex;gap:8px;width:100%">
+        <button class="btn btn-ghost" onclick="fecharModal('modal-carta')">Fechar</button>
+        <button class="btn btn-primary" onclick="imprimirDoc('carta')">🖨️ Imprimir / Salvar PDF</button>
+      </div>
     </div>
   </div>
 </div>
@@ -476,6 +484,12 @@
       </div>
     </div>
     <div class="modal-actions">
+      <div style="display:flex;align-items:center;gap:8px;width:100%;padding:0 4px;margin-bottom:6px">
+        <span style="font-size:11.5px;font-weight:600;color:var(--cinza-600);white-space:nowrap">📁 Nome sugerido:</span>
+        <input id="nome-arquivo-laudo" type="text" readonly onclick="this.select()"
+          style="flex:1;height:30px;padding:0 10px;border:1.5px solid var(--cinza-200);border-radius:6px;font-family:monospace;font-size:11.5px;background:#f9fafb;color:#0a3922;cursor:text;outline:none">
+        <button onclick="copiarNome('nome-arquivo-laudo')" style="height:30px;padding:0 12px;background:#0b6136;color:white;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">📋</button>
+      </div>
       <button class="btn btn-ghost" onclick="fecharModal('modal-laudo')">Fechar</button>
       <button class="btn btn-secondary" onclick="imprimirDoc('laudo')">🖨️ Imprimir / Salvar PDF</button>
     </div>
@@ -854,6 +868,15 @@ function previewComPapel(elId, conteudoHtml, padding) {
       </div>
     </div>`;
 }
+function copiarNome(inputId) {
+  const el = document.getElementById(inputId);
+  if(!el) return;
+  el.select();
+  navigator.clipboard.writeText(el.value).then(() => toast('Nome copiado!','success')).catch(() => {
+    document.execCommand('copy'); toast('Nome copiado!','success');
+  });
+}
+
 function gerarCarta() {
   const d=validar(); if(!d) return;
   docAtual=d;
@@ -861,6 +884,8 @@ function gerarCarta() {
   previewComPapel('preview-carta', htmlCartaAtual, 'padding:16.7% 8.3% 3.8% 8.3%');
   renderizarMensagens(d, 'carta');
   abrirModal('modal-carta');
+  const nc = document.getElementById('nome-arquivo-carta');
+  if(nc && docAtual) nc.value = nomeArquivoPDF('carta', docAtual).replace('.pdf','');
 }
 function gerarLaudo() {
   const d=validar(); if(!d) return;
@@ -869,6 +894,8 @@ function gerarLaudo() {
   previewComPapel('preview-laudo', htmlLaudoAtual, 'padding:16.7% 8.3% 9.5% 8.3%');
   renderizarMensagens(d, 'laudo');
   abrirModal('modal-laudo');
+  const nl = document.getElementById('nome-arquivo-laudo');
+  if(nl && docAtual) nl.value = nomeArquivoPDF('laudo', docAtual).replace('.pdf','');
 }
 
 function renderizarMensagens(d, tipo) {
@@ -1068,14 +1095,18 @@ function imprimirDoc(tipo) {
     <style>
       *{box-sizing:border-box;margin:0;padding:0}
       @page{size:210mm 297mm;margin:0}
-      html,body{width:210mm;height:297mm;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      body{font-family:Arial,sans-serif;font-size:12pt;color:#000}
-      #papel{display:block;width:210mm;height:297mm;margin-bottom:-297mm}
+      html,body{width:210mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      body{font-family:Arial,sans-serif;font-size:12pt;color:#000;position:relative}
+      #papel{display:block;width:210mm;height:297mm;margin-bottom:-297mm;position:relative;z-index:0}
       #papel img{display:block;width:210mm;height:297mm}
-      #conteudo{display:block;width:210mm;padding:${ptTop}pt ${ptRight}pt ${ptBottom}pt ${ptLeft}pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      /* Rodapé fixo no final de cada página */
+      @page{
+        @bottom-center{content:none}
+      }
+      #conteudo{display:block;width:210mm;padding:${ptTop}pt ${ptRight}pt ${ptBottom}pt ${ptLeft}pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;min-height:calc(297mm - ${ptTop}pt - ${ptBottom}pt)}
       p{margin:0 0 8px 0}
-      table{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:14px;font-size:11pt;border:1.5px solid #000}
-      th,td{border:1px solid #000 !important;outline:1px solid #000 !important}
+      table{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:10px;font-size:9pt;border:1.5px solid #000}
+      th,td{border:1px solid #000 !important;outline:1px solid #000 !important;padding:4px 7px !important}
       table *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
     </style>
   </head><body>
@@ -1343,7 +1374,17 @@ async function atualizarStatus(i,s) {
     try{ await sbFetch(`carta_historico?id=eq.${historico[i].id}`,'PATCH',{status:s}); } catch{}
   }
   localStorage.setItem('apis_historico',JSON.stringify(historico));
-  renderizarHistorico();
+  const badges = {'EM ANÁLISE':'badge-analise','PAGO':'badge-pago','RECUSADO':'badge-recusado'};
+  document.querySelectorAll('#historico-body tr').forEach(tr => {
+    if(parseInt(tr.dataset.index) === i) {
+      tr.dataset.status = s;
+      const badge = tr.querySelector('.badge');
+      if(badge) { badge.className = 'badge ' + (badges[s]||'badge-analise'); badge.textContent = s; }
+      const sel = tr.querySelector('select');
+      if(sel) { for(let o of sel.options) o.selected = (o.value===s); }
+    }
+  });
+  filtrarHistorico();
 }
 
 async function excluirHistorico(i) {
