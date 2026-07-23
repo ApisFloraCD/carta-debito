@@ -470,6 +470,7 @@
       <div style="display:flex;gap:8px;width:100%">
         <button class="btn btn-ghost" onclick="fecharModal('modal-carta')">Fechar</button>
         <button class="btn btn-primary" onclick="imprimirDoc('carta')">🖨️ Imprimir / Salvar PDF</button>
+        <button class="btn btn-secondary" onclick="salvarHistorico(docAtual,'carta').then(()=>toast('Salvo no histórico!','success'))">💾 Salvar no Histórico</button>
       </div>
     </div>
   </div>
@@ -495,6 +496,7 @@
       </div>
       <button class="btn btn-ghost" onclick="fecharModal('modal-laudo')">Fechar</button>
       <button class="btn btn-secondary" onclick="imprimirDoc('laudo')">🖨️ Imprimir / Salvar PDF</button>
+      <button class="btn btn-primary" onclick="salvarHistorico(docAtual,'laudo').then(()=>toast('Salvo no histórico!','success'))">💾 Salvar no Histórico</button>
     </div>
   </div>
 </div>
@@ -1132,7 +1134,7 @@ function imprimirDoc(tipo) {
     setTimeout(() => { try { document.body.removeChild(iframe); } catch(e){} }, 3000);
   }, 800);
 
-  salvarHistorico(docAtual, tipo);
+  // Histórico salvo pelo botão separado
 }
 
 // ══════════════════════════════════════════════
@@ -1353,7 +1355,7 @@ function exportarHistoricoExcel() {
   if(!historico.length) { toast('Nenhum registro para exportar.','warn'); return; }
   const cabecalho = ['Data','Nº Carta','Cliente','NFO','Valor (R$)','Transportadora','Responsável','Tipo','Status'];
   const linhas = historico.map(h => [
-    h.data_geracao||h.dataGeracao||'',
+    h.data_geracao||h.dataGeracao||h.created_at||'',
     h.numero, h.cliente, h.nfo,
     parseFloat(h.total||0).toFixed(2).replace('.',','),
     h.transp, h.responsavel||'', h.tipo==='carta'?'Carta de Débito':'Laudo de Descarte', h.status
@@ -1411,8 +1413,8 @@ function renderizarConsolidado() {
   const filtroResp   = document.getElementById('cons-resp')?.value || '';
   const filtroMes    = document.getElementById('cons-mes')?.value || '';
 
-  // Filtrar apenas cartas (não laudos)
-  let dados = historico.filter(h => h.tipo === 'carta');
+  // Filtrar apenas cartas (não laudos) - aceitar ambos os formatos
+  let dados = historico.filter(h => h.tipo === 'carta' || h.tipo === 'Carta de Débito');
 
   if(filtroTransp) dados = dados.filter(h => h.transp === filtroTransp);
   if(filtroStatus) dados = dados.filter(h => h.status === filtroStatus);
@@ -1420,8 +1422,7 @@ function renderizarConsolidado() {
   if(filtroMes) {
     const [ano, mes] = filtroMes.split('-');
     dados = dados.filter(h => {
-      const dg = h.data_geracao || '';
-      // Formato dd/mm/yyyy ou yyyy-mm-dd
+      const dg = h.data_geracao || h.dataGeracao || h.created_at || '';
       const partes = dg.includes('/') ? dg.split(' ')[0].split('/') : dg.split('T')[0].split('-');
       if(dg.includes('/')) return partes[2] === ano && partes[1] === mes;
       return partes[0] === ano && partes[1] === mes;
@@ -1478,7 +1479,7 @@ function renderizarConsolidado() {
   // Evolução mensal
   const porMes = {};
   dados.forEach(h => {
-    const dg = h.data_geracao || '';
+    const dg = h.data_geracao || h.dataGeracao || h.created_at || '';
     let mesAno = '??';
     if(dg.includes('/')) {
       const p = dg.split(' ')[0].split('/');
