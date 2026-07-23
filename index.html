@@ -953,39 +953,39 @@ function blocoAssinatura(resp) {
 function htmlCarta(d) {
   const linhas=d.itens.map(it=>`
     <tr>
-      <td style="border:1px solid #000;outline:1px solid #000;padding:4px 8px;text-align:center">${it.qtd}</td>
-      <td style="border:1px solid #000;outline:1px solid #000;padding:4px 8px">${it.desc}</td>
-      <td style="border:1px solid #000;outline:1px solid #000;padding:4px 8px;text-align:right">R$ ${formatMoeda(it.unit)}</td>
-      <td style="border:1px solid #000;outline:1px solid #000;padding:4px 8px;text-align:right">R$ ${formatMoeda(it.tot)}</td>
+      <td style="border:1px solid #000;outline:1px solid #000;padding:3px 6px;text-align:center">${it.qtd}</td>
+      <td style="border:1px solid #000;outline:1px solid #000;padding:3px 6px">${it.desc}</td>
+      <td style="border:1px solid #000;outline:1px solid #000;padding:3px 6px;text-align:right">R$ ${formatMoeda(it.unit)}</td>
+      <td style="border:1px solid #000;outline:1px solid #000;padding:3px 6px;text-align:right">R$ ${formatMoeda(it.tot)}</td>
     </tr>`).join('');
-  return `<div style="font-family:Arial,sans-serif;font-size:12pt;line-height:1.5;color:#000">
-    <p style="text-align:justify;margin-bottom:18px">Ribeirão Preto, ${d.dataFormatada}.</p>
-    <p style="text-align:center;font-size:14pt;font-weight:bold;margin-bottom:12px">Carta de débito nº ${d.numero}</p>
-    <p style="font-weight:bold;margin-bottom:18px">${d.transp}</p>
-    <p style="text-align:justify;margin-bottom:12px">Creditamos do transportador citado, das quantias decorrentes de avarias das respectivas notas fiscais;</p>
-    <p style="margin-bottom:4px">Ref.: NFD ${d.nfd}</p>
-    <p style="margin-bottom:4px">Ref.: NFO ${d.nfo}</p>
-    <p style="margin-bottom:18px">Remetente: ${d.cliente}</p>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11pt;border:1.5px solid #000">
+  return `<div style="font-family:Arial,sans-serif;font-size:10pt;line-height:1.35;color:#000">
+    <p style="text-align:justify;margin-bottom:10px">Ribeirão Preto, ${d.dataFormatada}.</p>
+    <p style="text-align:center;font-size:12pt;font-weight:bold;margin-bottom:8px">Carta de débito nº ${d.numero}</p>
+    <p style="font-weight:bold;margin-bottom:10px">${d.transp}</p>
+    <p style="text-align:justify;margin-bottom:8px">Creditamos do transportador citado, das quantias decorrentes de avarias das respectivas notas fiscais;</p>
+    <p style="margin-bottom:3px">Ref.: NFD ${d.nfd}</p>
+    <p style="margin-bottom:3px">Ref.: NFO ${d.nfo}</p>
+    <p style="margin-bottom:10px">Remetente: ${d.cliente}</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;font-size:9pt;border:1.5px solid #000">
       <thead>
         <tr style="border-bottom:1.5px solid #000">
-          <th style="width:60px;border-right:1px solid #000;border-bottom:1.5px solid #000;padding:5px 8px;text-align:center;font-weight:bold;outline:1px solid #000">Qtd</th>
-          <th style="border-right:1px solid #000;border-bottom:1.5px solid #000;padding:5px 8px;text-align:left;font-weight:bold;outline:1px solid #000">Descrição</th>
-          <th style="width:130px;border-right:1px solid #000;border-bottom:1.5px solid #000;padding:5px 8px;text-align:right;font-weight:bold;outline:1px solid #000">Valor unitário</th>
-          <th style="width:130px;border-bottom:1.5px solid #000;padding:5px 8px;text-align:right;font-weight:bold;outline:1px solid #000">Valor total</th>
+          <th style="width:50px;border-right:1px solid #000;border-bottom:1.5px solid #000;padding:4px 6px;text-align:center;font-weight:bold;outline:1px solid #000">Qtd</th>
+          <th style="border-right:1px solid #000;border-bottom:1.5px solid #000;padding:4px 6px;text-align:left;font-weight:bold;outline:1px solid #000">Descrição</th>
+          <th style="width:110px;border-right:1px solid #000;border-bottom:1.5px solid #000;padding:4px 6px;text-align:right;font-weight:bold;outline:1px solid #000">Valor unitário</th>
+          <th style="width:110px;border-bottom:1.5px solid #000;padding:4px 6px;text-align:right;font-weight:bold;outline:1px solid #000">Valor total</th>
         </tr>
       </thead>
       <tbody>${linhas}</tbody>
     </table>
-    <p style="font-weight:bold;margin-bottom:4px">Valor total: R$ ${formatMoeda(d.total)}</p>
-    <p style="font-weight:bold;margin-bottom:18px">Valor por extenso: ${numExtenso(d.total)}.</p>
-    <p style="margin-bottom:8px">O depósito deverá ser efetuado em conta corrente da Apis Flora em 07 dias úteis.</p>
-    <p style="margin-bottom:18px">Não será emitida nota fiscal contra o transportador, pois o estoque já foi baixado e os impostos recolhidos conforme danfe acima.</p>
-    ${d.obs ? `<p style="margin-bottom:18px;font-style:italic;color:#444">Observações: ${d.obs}</p>` : ''}
-    <p style="margin-bottom:4px">Banco: &nbsp;&nbsp;&nbsp; <strong>BRASIL</strong></p>
-    <p style="margin-bottom:4px">Agência: <strong>3235-2</strong></p>
-    <p style="margin-bottom:4px">C.C.: &nbsp;&nbsp;&nbsp;&nbsp; <strong>160.197-0</strong></p>
-    <p style="margin-bottom:32px">CNPJ: &nbsp;&nbsp;&nbsp; <strong>49.345.358/0001-45</strong></p>
+    <p style="font-weight:bold;margin-bottom:3px">Valor total: R$ ${formatMoeda(d.total)}</p>
+    <p style="font-weight:bold;margin-bottom:10px">Valor por extenso: ${numExtenso(d.total)}.</p>
+    <p style="margin-bottom:5px">O depósito deverá ser efetuado em conta corrente da Apis Flora em 07 dias úteis.</p>
+    <p style="margin-bottom:10px">Não será emitida nota fiscal contra o transportador, pois o estoque já foi baixado e os impostos recolhidos conforme danfe acima.</p>
+    ${d.obs ? `<p style="margin-bottom:10px;font-style:italic;color:#444">Observações: ${d.obs}</p>` : ''}
+    <p style="margin-bottom:3px">Banco: &nbsp;&nbsp;&nbsp; <strong>BRASIL</strong></p>
+    <p style="margin-bottom:3px">Agência: <strong>3235-2</strong></p>
+    <p style="margin-bottom:3px">C.C.: &nbsp;&nbsp;&nbsp;&nbsp; <strong>160.197-0</strong></p>
+    <p style="margin-bottom:20px">CNPJ: &nbsp;&nbsp;&nbsp; <strong>49.345.358/0001-45</strong></p>
     ${blocoAssinatura(d.resp)}
   </div>`;
 }
@@ -998,26 +998,26 @@ function htmlLaudo(d) {
       <td style="border:1px solid #000;outline:1px solid #000;padding:4px 8px;text-align:right">R$ ${formatMoeda(it.unit)}</td>
       <td style="border:1px solid #000;outline:1px solid #000;padding:4px 8px;text-align:right">R$ ${formatMoeda(it.tot)}</td>
     </tr>`).join('');
-  return `<div style="font-family:Arial,sans-serif;font-size:12pt;line-height:1.5;color:#000">
-    <p style="font-weight:bold;font-size:14pt;margin-bottom:20px">Laudo de Descarte</p>
-    <p style="text-align:justify;margin-bottom:14px">A <strong>Apis Flora Industrial e Comercial Ltda</strong>, inscrita no CNPJ 49.345.358/0001-45, estabelecida à Rua Triunfo n° 945, na cidade de Ribeirão Preto/SP, por meio deste Termo de Responsabilidade declara que assume a responsabilidade pela destinação e descarte final dos produtos acabados e devolvidos por motivos de avarias ou quaisquer problemas técnicos relacionados à entrega até o ponto de venda. Esses produtos devolvidos são classificados como Resíduos Classe II - Não perigosos e são destinados a uma empresa responsável que atende todos os requisitos legais para a atividade.</p>
-    <p style="text-align:justify;margin-bottom:14px">Sendo assim, isentamos a transportadora <strong>${d.transp}</strong>, com relação aos processos de destinação final da devolução de produtos da <strong>Apis Flora Industrial e Comercial Ltda.</strong></p>
+  return `<div style="font-family:Arial,sans-serif;font-size:10pt;line-height:1.35;color:#000">
+    <p style="font-weight:bold;font-size:12pt;margin-bottom:12px">Laudo de Descarte</p>
+    <p style="text-align:justify;margin-bottom:5px">A <strong>Apis Flora Industrial e Comercial Ltda</strong>, inscrita no CNPJ 49.345.358/0001-45, estabelecida à Rua Triunfo n° 945, na cidade de Ribeirão Preto/SP, por meio deste Termo de Responsabilidade declara que assume a responsabilidade pela destinação e descarte final dos produtos acabados e devolvidos por motivos de avarias ou quaisquer problemas técnicos relacionados à entrega até o ponto de venda. Esses produtos devolvidos são classificados como Resíduos Classe II - Não perigosos e são destinados a uma empresa responsável que atende todos os requisitos legais para a atividade.</p>
+    <p style="text-align:justify;margin-bottom:5px">Sendo assim, isentamos a transportadora <strong>${d.transp}</strong>, com relação aos processos de destinação final da devolução de produtos da <strong>Apis Flora Industrial e Comercial Ltda.</strong></p>
     <p style="margin-bottom:4px">Ref.: NFD ${d.nfd}</p>
     <p style="margin-bottom:4px">Ref.: NFO ${d.nfo}</p>
-    <p style="margin-bottom:18px">Remetente: ${d.cliente}</p>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:11pt;border:1.5px solid #000">
+    <p style="margin-bottom:10px">Remetente: ${d.cliente}</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:9pt;border:1.5px solid #000">
       <thead>
         <tr>
-          <th style="width:60px;border-right:1px solid #000;border-bottom:1.5px solid #000;padding:5px 8px;text-align:center;font-weight:bold;outline:1px solid #000">Qtd</th>
-          <th style="border-right:1px solid #000;border-bottom:1.5px solid #000;padding:5px 8px;text-align:left;font-weight:bold;outline:1px solid #000">Descrição</th>
-          <th style="width:130px;border-right:1px solid #000;border-bottom:1.5px solid #000;padding:5px 8px;text-align:right;font-weight:bold;outline:1px solid #000">Valor unitário</th>
-          <th style="width:130px;border-bottom:1.5px solid #000;padding:5px 8px;text-align:right;font-weight:bold;outline:1px solid #000">Valor total</th>
+          <th style="width:60px;border-right:1px solid #000;border-bottom:1.5px solid #000;padding:3px 6px;text-align:center;font-weight:bold;outline:1px solid #000">Qtd</th>
+          <th style="border-right:1px solid #000;border-bottom:1.5px solid #000;padding:3px 6px;text-align:left;font-weight:bold;outline:1px solid #000">Descrição</th>
+          <th style="width:130px;border-right:1px solid #000;border-bottom:1.5px solid #000;padding:3px 6px;text-align:right;font-weight:bold;outline:1px solid #000">Valor unitário</th>
+          <th style="width:130px;border-bottom:1.5px solid #000;padding:3px 6px;text-align:right;font-weight:bold;outline:1px solid #000">Valor total</th>
         </tr>
       </thead>
       <tbody>${linhas}</tbody>
     </table>
-    ${d.obs ? `<p style="margin-bottom:14px;font-style:italic;color:#444">Observações: ${d.obs}</p>` : ''}
-    <p style="text-align:center;margin-bottom:32px">Ribeirão Preto, ${d.dataFormatada}.</p>
+    ${d.obs ? `<p style="margin-bottom:5px;font-style:italic;color:#444">Observações: ${d.obs}</p>` : ''}
+    <p style="text-align:center;margin-bottom:18px">Ribeirão Preto, ${d.dataFormatada}.</p>
     ${blocoAssinatura(d.resp)}
   </div>`;
 }
@@ -1081,7 +1081,7 @@ function imprimirDoc(tipo) {
   const conteudo = tipo === 'carta' ? htmlCartaAtual : htmlLaudoAtual;
   if(!conteudo) return;
 
-  const ptTop    = tipo==='carta' ? 99 : 99;
+  const ptTop    = tipo==='carta' ? 80 : 80;
   const ptRight  = tipo==='carta' ? 50 : 50;
   const ptBottom = tipo==='carta' ? 23 : 57;
   const ptLeft   = tipo==='carta' ? 50 : 50;
@@ -1099,11 +1099,11 @@ function imprimirDoc(tipo) {
       *{box-sizing:border-box;margin:0;padding:0}
       @page{size:210mm 297mm;margin:0}
       html,body{width:210mm;height:297mm;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      body{font-family:Arial,sans-serif;font-size:12pt;color:#000}
+      body{font-family:Arial,sans-serif;font-size:10pt;color:#000}
       #papel{display:block;width:210mm;height:297mm;margin-bottom:-297mm}
       #papel img{display:block;width:210mm;height:297mm}
       #conteudo{display:block;width:210mm;padding:${ptTop}pt ${ptRight}pt ${ptBottom}pt ${ptLeft}pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      p{margin:0 0 8px 0}
+      p{margin:0 0 5px 0}
       table{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:10px;font-size:9pt;border:1.5px solid #000}
       th,td{border:1px solid #000 !important;outline:1px solid #000 !important;padding:4px 7px !important}
       table *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
@@ -1161,7 +1161,8 @@ async function salvarHistorico(d,tipo) {
     const salvo=await sbFetch('carta_historico','POST',reg);
     historico.unshift(salvo[0]||reg);
     toast(`${tipo==='carta'?'Carta':'Laudo'} salvo no histórico!`,'success');
-  } catch {
+  } catch(e) {
+    console.error('Erro ao salvar no Supabase:', e);
     historico.unshift(reg);
     localStorage.setItem('apis_historico',JSON.stringify(historico));
     toast('Salvo localmente (sem conexão).','warn');
