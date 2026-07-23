@@ -1095,15 +1095,11 @@ function imprimirDoc(tipo) {
     <style>
       *{box-sizing:border-box;margin:0;padding:0}
       @page{size:210mm 297mm;margin:0}
-      html,body{width:210mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      body{font-family:Arial,sans-serif;font-size:12pt;color:#000;position:relative}
-      #papel{display:block;width:210mm;height:297mm;margin-bottom:-297mm;position:relative;z-index:0}
+      html,body{width:210mm;height:297mm;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      body{font-family:Arial,sans-serif;font-size:12pt;color:#000}
+      #papel{display:block;width:210mm;height:297mm;margin-bottom:-297mm}
       #papel img{display:block;width:210mm;height:297mm}
-      /* Rodapé fixo no final de cada página */
-      @page{
-        @bottom-center{content:none}
-      }
-      #conteudo{display:block;width:210mm;padding:${ptTop}pt ${ptRight}pt ${ptBottom}pt ${ptLeft}pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;min-height:calc(297mm - ${ptTop}pt - ${ptBottom}pt)}
+      #conteudo{display:block;width:210mm;padding:${ptTop}pt ${ptRight}pt ${ptBottom}pt ${ptLeft}pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
       p{margin:0 0 8px 0}
       table{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:10px;font-size:9pt;border:1.5px solid #000}
       th,td{border:1px solid #000 !important;outline:1px solid #000 !important;padding:4px 7px !important}
